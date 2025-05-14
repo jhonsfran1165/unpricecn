@@ -1,0 +1,86 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "pricing-table",
+  "type": "registry:component",
+  "title": "Pricing Table",
+  "description": "A pricing table component",
+  "dependencies": [
+    "lucide-react",
+    "@unprice/api"
+  ],
+  "registryDependencies": [
+    "button",
+    "card"
+  ],
+  "files": [
+    {
+      "path": "registry/basic/pricing-table/page.tsx",
+      "content": "import { PricingTable } from \"@/registry/basic/pricing-table/components/pricing-table\"\nimport { unprice } from \"@/registry/basic/pricing-table/lib/unprice\"\n\nexport default async function Page() {\n  const {\n    result: plansUnprice,\n    error,\n  } = await unprice.plans.listPlanVersions({\n    onlyPublished: true,\n    onlyLatest: true,\n    currency: \"EUR\",\n  })\n\n  if (error) {\n    return <div>Error fetching plans</div>\n  }\n\n  // Transform Unprice plans to match our PricingPlan interface\n  const plans = plansUnprice.planVersions.map((version) => {\n    // Get features from plan features\n    const features = version.planFeatures.filter(feature => !feature.hidden).map(feature => {\n      return feature.displayFeatureText\n    }) || []\n\n    return {\n      slug: version.plan.slug,\n      flatPrice: version.flatPrice,\n      currency: version.currency,\n      description: version.description || \"No description available\",\n      features,\n      cta: version.plan.enterprisePlan ? \"Contact Us\" : \"Get Started\",\n      isEnterprisePlan: version.plan.enterprisePlan || false,\n      billingPeriod: version.billingConfig.billingInterval,\n    }\n  }) || []\n\n  return (\n    <main className=\"container mx-auto\">\n      <PricingTable plans={plans} popularPlan=\"PRO\" />\n    </main>\n  )\n}\n",
+      "type": "registry:page",
+      "target": "app/page.tsx"
+    },
+    {
+      "path": "registry/basic/pricing-table/components/pricing-table.tsx",
+      "content": "\"use client\"\n\nimport type * as React from \"react\"\nimport { cn } from \"@/lib/utils\"\nimport { PricingCard, type PricingPlan } from \"./pricing-card\"\n\nexport interface PricingTableProps extends React.HTMLAttributes<HTMLDivElement> {\n  title?: string\n  subtitle?: string\n  plans: PricingPlan[]\n  yearlyDiscount?: number\n  discountLabel?: string\n  popularPlan: string\n}\n\nexport function PricingTable({\n  title = \"Simple, Transparent Pricing\",\n  subtitle = \"Choose the plan that's right for you\",\n  plans,\n  discountLabel = \"Save\",\n  className,\n  popularPlan,\n  ...props\n}: PricingTableProps) {\n  return (\n    <div className={cn(\"w-full py-10\", className)} {...props}>\n      <div className=\"text-center mb-20\">\n        <h2 className=\"text-3xl font-bold tracking-tight\">{title}</h2>\n        <p className=\"text-muted-foreground mt-2\">{subtitle}</p>\n      </div>\n\n      <div className=\"grid grid-cols-1 md:grid-cols-3 gap-6\">\n        {plans.map((plan) => (\n          <PricingCard\n            key={plan.slug}\n            plan={plan}\n            isPopular={plan.slug.toLowerCase() === popularPlan.toLowerCase()}\n          />\n        ))}\n      </div>\n    </div>\n  )\n}\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "registry/basic/pricing-table/components/pricing-card.tsx",
+      "content": "\"use client\"\n\nimport { Check } from \"lucide-react\"\nimport type * as React from \"react\"\n\nimport { Button } from \"@/components/ui/button\"\nimport { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from \"@/components/ui/card\"\nimport { cn } from \"@/lib/utils\"\n\nexport interface PricingPlan {\n  slug: string\n  flatPrice: string\n  isEnterprisePlan: boolean\n  description: string\n  features: string[]\n  cta: string\n  currency: string\n  billingPeriod: string\n}\n\nexport interface PricingCardProps extends React.HTMLAttributes<HTMLDivElement> {\n  plan: PricingPlan\n  isPopular: boolean\n}\n\nexport function PricingCard({\n  plan,\n  isPopular,\n  className,\n  ...props\n}: PricingCardProps) {\n  const currentPrice = plan.flatPrice\n\n  return (\n    <Card\n      className={cn(\n        \"flex flex-col\",\n        isPopular && \"border-primary shadow-lg relative\",\n        className\n      )}\n      style={\n        isPopular\n          ? {\n              boxShadow: \"0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)\",\n            }\n          : {}\n      }\n      {...props}\n    >\n          {isPopular && (\n        <div className=\"absolute -top-4 left-0 right-0 flex justify-center\">\n          <span\n            className=\"text-sm font-medium py-1 px-3 rounded-full bg-primary text-primary-foreground\"\n          >\n            Recommended\n          </span>\n        </div>\n      )}\n      <CardHeader>\n        <CardTitle>{plan.slug}</CardTitle>\n        <div className=\"mt-2\">\n          {!plan.isEnterprisePlan && (\n            <div className=\"flex items-baseline\">\n              <span className=\"text-3xl font-bold\">{currentPrice}</span>\n              <span className=\"text-muted-foreground ml-1\">/{plan.billingPeriod}</span>\n            </div>\n          )}\n        </div>\n        <CardDescription className=\"mt-2 line-clamp-2\">{plan.description}</CardDescription>\n      </CardHeader>\n      <CardContent className=\"flex-grow\">\n        <ul className=\"space-y-2\">\n          {plan.features.map((feature) => (\n            <li key={feature} className=\"flex items-center\">\n              <Check\n                className=\"h-4 w-4 mr-2 flex-shrink-0 text-primary\"\n              />\n              <span>{feature}</span>\n            </li>\n          ))}\n        </ul>\n      </CardContent>\n      <CardFooter>\n        <Button\n          className={cn(\"w-full\", isPopular && \"bg-primary text-primary-foreground\")}\n          variant={isPopular ? \"default\" : \"outline\"}\n        >\n          {plan.cta}\n        </Button>\n      </CardFooter>\n    </Card>\n  )\n}\n",
+      "type": "registry:component"
+    },
+    {
+      "path": "registry/basic/pricing-table/lib/unprice.ts",
+      "content": "import { Unprice } from \"@unprice/api\"\n\nexport const unprice = new Unprice({\n  token: process.env.UNPRICE_API_KEY as string,\n  baseUrl: process.env.UNPRICE_API_URL as string,\n})\n",
+      "type": "registry:lib"
+    }
+  ],
+  "tailwind": {
+    "config": {
+      "theme": {
+        "extend": {
+          "keyframes": {
+            "accordion-down": {
+              "from": {
+                "height": "0"
+              },
+              "to": {
+                "height": "var(--radix-accordion-content-height)"
+              }
+            },
+            "accordion-up": {
+              "from": {
+                "height": "var(--radix-accordion-content-height)"
+              },
+              "to": {
+                "height": "0"
+              }
+            },
+            "fadeIn": {
+              "from": {
+                "opacity": "0"
+              },
+              "to": {
+                "opacity": "1"
+              }
+            },
+            "fadeOut": {
+              "from": {
+                "opacity": "1"
+              },
+              "to": {
+                "opacity": "0"
+              }
+            }
+          },
+          "animation": {
+            "accordion-down": "accordion-down 0.2s ease-out",
+            "accordion-up": "accordion-up 0.2s ease-out",
+            "fade-in": "fadeIn 0.3s ease-in-out",
+            "fade-out": "fadeOut 0.3s ease-in-out"
+          }
+        }
+      }
+    }
+  }
+}

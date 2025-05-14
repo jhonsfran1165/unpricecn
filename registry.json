@@ -1,64 +1,73 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
-  "name": "acme",
-  "homepage": "https://acme.com",
+  "name": "unpricecn",
+  "homepage": "https://unpricecn.dev",
   "items": [
     {
-      "name": "hello-world",
+      "name": "pricing-table",
       "type": "registry:component",
-      "title": "Hello World",
-      "description": "A simple hello world component",
-      "registryDependencies": ["button"],
+      "title": "Pricing Table",
+      "description": "A pricing table component",
+      "dependencies": [
+        "lucide-react",
+        "@unprice/api"
+      ],
+      "registryDependencies": [
+        "button",
+        "card"
+      ],
       "files": [
         {
-          "path": "registry/new-york/hello-world/hello-world.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "example-form",
-      "type": "registry:component",
-      "title": "Example Form",
-      "description": "A contact form with Zod validation.",
-      "dependencies": ["zod"],
-      "registryDependencies": ["button", "input", "label", "textarea", "card"],
-      "files": [
-        {
-          "path": "registry/new-york/example-form/example-form.tsx",
-          "type": "registry:component"
-        }
-      ]
-    },
-    {
-      "name": "complex-component",
-      "type": "registry:component",
-      "title": "Complex Component",
-      "description": "A complex component showing hooks, libs and components.",
-      "registryDependencies": ["card"],
-      "files": [
-        {
-          "path": "registry/new-york/complex-component/page.tsx",
+          "path": "registry/basic/pricing-table/page.tsx",
           "type": "registry:page",
-          "target": "app/pokemon/page.tsx"
+          "target": "app/page.tsx"
         },
         {
-          "path": "registry/new-york/complex-component/components/pokemon-card.tsx",
+          "path": "registry/basic/pricing-table/components/pricing-table.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/complex-component/components/pokemon-image.tsx",
+          "path": "registry/basic/pricing-table/components/pricing-card.tsx",
           "type": "registry:component"
         },
         {
-          "path": "registry/new-york/complex-component/lib/pokemon.ts",
+          "path": "registry/basic/pricing-table/lib/unprice.ts",
           "type": "registry:lib"
-        },
-        {
-          "path": "registry/new-york/complex-component/hooks/use-pokemon.ts",
-          "type": "registry:hook"
         }
-      ]
+      ],
+      "tailwind": {
+        "config": {
+
+          "theme": {
+            "extend": {
+              "keyframes": {
+                "accordion-down": {
+                  "from": { "height": "0" },
+                  "to": { "height": "var(--radix-accordion-content-height)" }
+                },
+              "accordion-up": {
+                "from": { "height": "var(--radix-accordion-content-height)" },
+                "to": { "height": "0" }
+              },
+              "fadeIn": {
+                "from": { "opacity": "0" },
+                "to": { "opacity": "1" }
+              },
+                "fadeOut": {
+                  "from": { "opacity": "1" },
+                  "to": { "opacity": "0" }
+                }
+              },
+              "animation": {
+                "accordion-down": "accordion-down 0.2s ease-out",
+                "accordion-up": "accordion-up 0.2s ease-out",
+                "fade-in": "fadeIn 0.3s ease-in-out",
+                "fade-out": "fadeOut 0.3s ease-in-out"
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
